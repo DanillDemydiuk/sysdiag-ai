@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------------------
+# Build output
+# ---------------------------------------------------------------------------
+bin/
+obj/
+artifacts/
+*.user
+*.suo
+
+# ---------------------------------------------------------------------------
+# IDE / editor state (machine specific, never shared)
+# ---------------------------------------------------------------------------
+.vs/
+.vscode/
+.idea/
+*.DotSettings.user
+
+# ---------------------------------------------------------------------------
+# Test and coverage results
+# ---------------------------------------------------------------------------
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.cobertura.xml
+
+# ---------------------------------------------------------------------------
+# Local runtime data: snapshot database and machine specific overrides.
+# The database contains real hardware data and must never leave the machine.
+# ---------------------------------------------------------------------------
+data/
+*.db
+*.db-shm
+*.db-wal
+appsettings.local.json
+appsettings.Development.json
+
+# ---------------------------------------------------------------------------
+# OS noise
+# ---------------------------------------------------------------------------
+Thumbs.db
+Desktop.ini
+.DS_Store

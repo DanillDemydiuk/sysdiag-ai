@@ -1,0 +1,24 @@
+# Normalize line endings: LF in the repository, native endings in the working
+# directory. Without this the project produces noisy diffs when it is built on
+# Windows and on Linux (CI runs on both).
+* text=auto
+
+# Source and configuration files are always text.
+*.cs        text diff=csharp
+*.csproj    text
+*.sln       text eol=crlf
+*.json      text
+*.yml       text
+*.yaml      text
+*.md        text
+
+# Shell scripts must keep LF, PowerShell scripts must keep CRLF.
+*.sh        text eol=lf
+*.ps1       text eol=crlf
+
+# Binary files: never diff, never convert.
+*.png       binary
+*.jpg       binary
+*.gif       binary
+*.ico       binary
+*.db        binary
