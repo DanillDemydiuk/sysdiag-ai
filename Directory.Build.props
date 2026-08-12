@@ -1,0 +1,33 @@
+<Project>
+
+  <!--
+    Settings that apply to every project in this repository.
+    MSBuild imports this file automatically for each .csproj below it,
+    so the individual project files stay free of repeated boilerplate.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Nullable reference types are the main safety net of this project:
+         "no data available" is a normal result for a hardware collector,
+         so a missing value has to be visible in the type, not at runtime. -->
+    <Nullable>enable</Nullable>
+
+    <!-- A warning that nobody fixes is noise. The build fails instead. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+
+    <!-- Output is formatted for humans, not localized. This also drops the
+         ICU dependency, which keeps the Linux container image smaller. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Product>SysDiag-AI</Product>
+    <Authors>Daniil Demydiuk</Authors>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+</Project>
