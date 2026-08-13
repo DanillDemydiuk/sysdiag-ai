@@ -23,15 +23,6 @@ public sealed class LinuxCollector : ISystemCollector
     private const string KernelReleasePath = "/proc/sys/kernel/osrelease";
     private const string MaxClockPath = "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq";
 
-    /// <summary>
-    /// Virtual file systems that appear in the mount table but describe no real
-    /// storage. Listing them as disks would be noise in every diff.
-    /// </summary>
-    private static readonly HashSet<string> PseudoFileSystems = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "tmpfs", "devtmpfs", "ramfs", "squashfs", "overlay", "proc", "sysfs", "devpts", "cgroup2fs", "fuse",
-    };
-
     private readonly TimeProvider _timeProvider;
 
     public LinuxCollector(TimeProvider? timeProvider = null)
@@ -119,7 +110,7 @@ public sealed class LinuxCollector : ISystemCollector
         {
             try
             {
-                if (!drive.IsReady || PseudoFileSystems.Contains(drive.DriveFormat) || drive.TotalSize <= 0)
+                if (!drive.IsReady || drive.TotalSize <= 0 || !MountFilter.IsRealVolume(drive.Name, drive.DriveFormat))
                 {
                     continue;
                 }
