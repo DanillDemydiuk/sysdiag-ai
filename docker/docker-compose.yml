@@ -1,0 +1,25 @@
+# Local LLM runtime for SysDiag-AI.
+#
+# CPU only on purpose: this file has to work on any laptop, without drivers and
+# without a graphics card. See docker-compose.gpu.yml for the NVIDIA variant.
+services:
+  ollama:
+    image: ollama/ollama:0.5.7
+    container_name: sysdiag-ollama
+    restart: unless-stopped
+    ports:
+      # Bound to localhost only: the model must not be reachable from the network.
+      - "127.0.0.1:11434:11434"
+    volumes:
+      # Downloaded models survive a container rebuild; they are several gigabytes
+      # each and nobody wants to pull them twice.
+      - ollama-models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  ollama-models:
