@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using SysDiag.Core.Diff;
 using SysDiag.Core.Formatting;
 using SysDiag.Core.Models;
 
@@ -55,6 +56,72 @@ public static class PromptBuilder
         builder.AppendLine("=== END OF SNAPSHOT ===");
 
         return builder.ToString();
+    }
+
+    /// <summary>
+    /// Describes the differences between two snapshots and asks whether they are
+    /// harmless.
+    /// </summary>
+    /// <remarks>
+    /// The diff is already computed, so the model is never asked to compare
+    /// anything - only to judge a finished list. That keeps the arithmetic in C#,
+    /// where it is tested, and leaves the model the part it is actually good at.
+    /// </remarks>
+    public static string BuildForDiff(SnapshotDiff diff, string responseLanguage = "German")
+    {
+        ArgumentNullException.ThrowIfNull(diff);
+
+        var builder = new StringBuilder();
+
+        builder.AppendLine("You are a helpful IT support assistant.");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Explain in {responseLanguage} what changed on a computer between two check-ups.");
+        builder.AppendLine("Write for a non-technical reader. Say for each change whether it is harmless,");
+        builder.AppendLine("worth watching, or a reason to act, and give one short reason.");
+        builder.AppendLine("Use only the list below. Do not guess causes that are not visible in the data.");
+        builder.AppendLine("Repeat every number exactly as written. Write numbers as digits, never as words.");
+        builder.AppendLine("Entries marked as FLUCTUATING change on their own between two check-ups;");
+        builder.AppendLine("treat them as normal and do not present them as a problem.");
+        builder.AppendLine();
+        builder.AppendLine("=== CHANGES ===");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Earlier check-up: {diff.LeftCreatedAtUtc:yyyy-MM-dd HH:mm} UTC");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Later check-up:   {diff.RightCreatedAtUtc:yyyy-MM-dd HH:mm} UTC");
+        builder.AppendLine();
+
+        if (diff.Entries.Count == 0)
+        {
+            // Nothing to interpret. Saying so explicitly stops the model from
+            // inventing changes to fill an empty list.
+            builder.AppendLine("No differences were found at all. State clearly that nothing changed.");
+        }
+        else
+        {
+            foreach (DiffEntry entry in diff.Entries)
+            {
+                builder.AppendLine(CultureInfo.InvariantCulture, $"- {DescribeEntry(entry)}");
+            }
+
+            if (!diff.HasRelevantChanges)
+            {
+                builder.AppendLine();
+                builder.AppendLine("All listed entries are fluctuating values. The configuration itself did not change.");
+            }
+        }
+
+        builder.AppendLine("=== END OF CHANGES ===");
+
+        return builder.ToString();
+    }
+
+    private static string DescribeEntry(DiffEntry entry)
+    {
+        string marker = entry.IsVolatile ? " [FLUCTUATING]" : string.Empty;
+
+        return entry.Kind switch
+        {
+            ChangeKind.Added => $"{entry.Category}: newly present - {entry.NewValue}{marker}",
+            ChangeKind.Removed => $"{entry.Category}: no longer present - {entry.OldValue}{marker}",
+            _ => $"{entry.Category}, {entry.Property}: was {entry.OldValue}, is now {entry.NewValue}{marker}",
+        };
     }
 
     private static void AppendDisks(StringBuilder builder, IReadOnlyList<DiskInfo> disks)

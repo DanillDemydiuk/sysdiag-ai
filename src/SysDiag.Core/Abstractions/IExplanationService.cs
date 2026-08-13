@@ -1,3 +1,4 @@
+using SysDiag.Core.Diff;
 using SysDiag.Core.Models;
 
 namespace SysDiag.Core.Abstractions;
@@ -14,4 +15,11 @@ public interface IExplanationService
     /// a notice and continue.
     /// </summary>
     Task<ExplanationResult> ExplainAsync(SystemSnapshot snapshot, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Asks the model to judge what changed between two snapshots: which entries
+    /// are harmless and which deserve attention. Fails the same way as
+    /// <see cref="ExplainAsync"/> - with a result, never with an exception.
+    /// </summary>
+    Task<ExplanationResult> ExplainDiffAsync(SnapshotDiff diff, CancellationToken cancellationToken = default);
 }

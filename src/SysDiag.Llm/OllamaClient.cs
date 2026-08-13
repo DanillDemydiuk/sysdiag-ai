@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using SysDiag.Core.Abstractions;
+using SysDiag.Core.Diff;
 using SysDiag.Core.Models;
 
 namespace SysDiag.Llm;
@@ -35,12 +36,30 @@ public sealed class OllamaClient : IExplanationService
         _options = options;
     }
 
-    public async Task<ExplanationResult> ExplainAsync(
+    public Task<ExplanationResult> ExplainAsync(
         SystemSnapshot snapshot,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
 
+        return GenerateAsync(PromptBuilder.Build(snapshot, _options.ResponseLanguage), cancellationToken);
+    }
+
+    public Task<ExplanationResult> ExplainDiffAsync(
+        SnapshotDiff diff,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(diff);
+
+        return GenerateAsync(PromptBuilder.BuildForDiff(diff, _options.ResponseLanguage), cancellationToken);
+    }
+
+    /// <summary>
+    /// Sends one prompt and maps every possible outcome to a result. Both public
+    /// methods share it, so the failure handling cannot drift apart.
+    /// </summary>
+    private async Task<ExplanationResult> GenerateAsync(string prompt, CancellationToken cancellationToken)
+    {
         if (!Uri.TryCreate(_options.BaseUrl, UriKind.Absolute, out Uri? baseUri))
         {
             return ExplanationResult.Unavailable(
@@ -49,7 +68,7 @@ public sealed class OllamaClient : IExplanationService
 
         var requestBody = new OllamaGenerateRequest(
             _options.Model,
-            PromptBuilder.Build(snapshot, _options.ResponseLanguage),
+            prompt,
             Stream: false,
             OllamaSamplingOptions.Factual);
 
