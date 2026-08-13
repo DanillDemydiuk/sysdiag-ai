@@ -55,13 +55,19 @@ dotnet run --project src/SysDiag.Cli -- scan
 | --- | --- |
 | `scan [--demo]` | Konfiguration erfassen und als neuen Snapshot speichern |
 | `list [--limit n]` | Gespeicherte Snapshots auflisten, neueste zuerst |
-| `compare <id1> <id2>` | Unterschiede zwischen zwei Snapshots anzeigen |
+| `compare <id1> <id2> [--explain]` | Unterschiede anzeigen, auf Wunsch vom Modell bewerten lassen |
 | `explain [id]` | Snapshot vom lokalen Modell erklaeren lassen |
+| `export [id] --format json\|markdown [--output datei]` | Snapshot als Datei oder auf die Standardausgabe schreiben |
 
 Beim Vergleich werden Datentraeger und Netzwerkkarten ueber ihren Bezeichner
 zugeordnet, nicht ueber ihre Position in der Liste. Werte, die sich von selbst
 aendern - freier Arbeitsspeicher, freier Speicherplatz - sind als solche
 markiert und zaehlen nicht als Konfigurationsaenderung.
+
+Die beiden Exportformate haben verschiedene Adressaten: JSON liefert rohe
+Byte-Werte und feste Schluessel fuer andere Programme, Markdown liefert
+gerundete Werte und Tabellen zum Einfuegen in ein Ticket. Netzwerkadressen
+stehen nur im JSON - ein Bericht, den man weitergibt, braucht sie nicht.
 
 ## Sprachmodell (optional)
 
@@ -155,11 +161,12 @@ Docker oder ein Netzwerk; die Testsuite laeuft in CI unter Ubuntu und Windows.
 
 ## In Planung
 
-- Export eines Snapshots nach JSON und Markdown
 - `scan --watch`: geplante Snapshots als Windows-Dienst oder systemd-Timer
 - Weitere Sammelpunkte: BIOS-Version, installierte Updates, Autostart-Eintraege
-- macOS-Collector (aktuell faellt macOS auf den Demo-Modus zurueck)
-- Zusammenfassung eines Diffs durch das Sprachmodell, nicht nur eines Snapshots
+- macOS-Collector (aktuell faellt macOS auf den Demo-Modus zurueck, mit Hinweis
+  an den Benutzer - geschrieben wird er erst, wenn er auf echter Hardware
+  geprueft werden kann)
+- Export mehrerer Snapshots am Stueck, etwa fuer eine Inventarliste
 
 ## Lizenz
 
