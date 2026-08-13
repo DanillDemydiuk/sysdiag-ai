@@ -24,6 +24,7 @@ public sealed class SnapshotComparer : ISnapshotComparer
 
         var entries = new List<DiffEntry>();
 
+        CompareIdentity(entries, left, right);
         CompareOs(entries, left.Os, right.Os);
         CompareCpu(entries, left.Cpu, right.Cpu);
         CompareMemory(entries, left.Memory, right.Memory);
@@ -38,6 +39,22 @@ public sealed class SnapshotComparer : ISnapshotComparer
             RightCreatedAtUtc = right.CreatedAtUtc,
             Entries = entries,
         };
+    }
+
+    /// <summary>
+    /// Compares what the two snapshots describe, before comparing the hardware.
+    /// </summary>
+    /// <remarks>
+    /// Without this, comparing snapshots of two different machines - or a demo
+    /// snapshot against a real one - produces a long list of changes and no clue
+    /// why. The first row of the table now names the reason.
+    /// </remarks>
+    private static void CompareIdentity(List<DiffEntry> entries, SystemSnapshot left, SystemSnapshot right)
+    {
+        const string category = "Machine";
+
+        AddIfDifferent(entries, category, "Host name", left.MachineName, right.MachineName);
+        AddIfDifferent(entries, category, "Data source", left.CollectorName, right.CollectorName);
     }
 
     private static void CompareOs(List<DiffEntry> entries, OsInfo left, OsInfo right)

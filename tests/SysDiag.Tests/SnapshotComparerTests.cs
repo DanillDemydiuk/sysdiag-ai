@@ -161,6 +161,34 @@ public sealed class SnapshotComparerTests
     }
 
     [Fact]
+    public void Compare_SnapshotsOfDifferentMachines_ReportsTheHostName()
+    {
+        // Found while running two scans in short-lived containers: both snapshots
+        // came from different hosts and the diff said nothing about it.
+        SystemSnapshot first = TestData.Snapshot();
+        SystemSnapshot second = first with { MachineName = "OTHER-PC" };
+
+        SnapshotDiff diff = _comparer.Compare(first, second);
+
+        DiffEntry entry = diff.Entries.Should().ContainSingle().Subject;
+        entry.Category.Should().Be("Machine");
+        entry.Property.Should().Be("Host name");
+        entry.OldValue.Should().Be("TEST-PC");
+        entry.NewValue.Should().Be("OTHER-PC");
+    }
+
+    [Fact]
+    public void Compare_DemoAgainstRealSnapshot_ReportsTheDataSource()
+    {
+        SystemSnapshot demo = TestData.Snapshot();
+        SystemSnapshot real = demo with { CollectorName = "windows-wmi" };
+
+        SnapshotDiff diff = _comparer.Compare(demo, real);
+
+        diff.Entries.Should().ContainSingle(entry => entry.Property == "Data source");
+    }
+
+    [Fact]
     public void Compare_KeepsSnapshotMetadata()
     {
         SystemSnapshot before = TestData.Snapshot(id: 7, createdAt: TestData.Morning);
