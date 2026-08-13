@@ -73,6 +73,30 @@ dotnet run --project src/SysDiag.Cli -- explain
 
 Details, auch zur GPU-Variante, stehen in [docker/README.md](docker/README.md).
 
+### Welches Modell?
+
+Voreingestellt ist `llama3.2:3b`, weil es mit rund 2 GB auf jedem Rechner ohne
+Grafikkarte laeuft. Der Preis dafuer ist die Qualitaet der Erklaerung: im
+Vergleich auf derselben Momentaufnahme blieb der Text knapp, liess den fast
+belegten Arbeitsspeicher unerwaehnt und rechnete Prozentwerte selbst nach,
+statt die vorgegebenen zu uebernehmen.
+
+Wer eine GPU mit etwa 10 GB Speicher oder mehr hat, bekommt mit einem
+groesseren Modell deutlich verlaesslichere Ergebnisse. Der Wechsel braucht
+keine Codeaenderung - eine Datei `appsettings.local.json` neben der Anwendung
+genuegt, sie wird nicht versioniert:
+
+```json
+{
+  "Ollama": {
+    "Model": "qwen2.5:14b"
+  }
+}
+```
+
+Unabhaengig vom Modell gilt: die Tabellen von `scan` und `compare` sind die
+belastbare Quelle. Der Modelltext ist eine Lesehilfe, keine Messung.
+
 ## Architektur
 
 ```mermaid
