@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# A new push to the same branch cancels the previous run: the old result is
+# worthless as soon as newer code exists.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # Both jobs always run to completion: knowing that Linux fails while
+      # Windows passes is the whole point of the matrix.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        # Warnings are errors in this repository, so a warning fails the build
+        # here as well - which is exactly the intention.
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Smoke test the CLI in demo mode
+        # Proves on both operating systems that the application starts, collects
+        # data, writes to SQLite and reads it back - without any hardware access.
+        run: |
+          dotnet run --project src/SysDiag.Cli --configuration Release --no-build -- scan --demo
+          dotnet run --project src/SysDiag.Cli --configuration Release --no-build -- list
