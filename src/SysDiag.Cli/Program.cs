@@ -61,7 +61,8 @@ using (services)
 
         config.AddCommand<CompareCommand>("compare")
             .WithDescription("Show the differences between two snapshots.")
-            .WithExample("compare", "1", "2");
+            .WithExample("compare", "1", "2")
+            .WithExample("compare", "1", "2", "--explain");
 
         config.AddCommand<ExportCommand>("export")
         .WithDescription("Write a snapshot as JSON or Markdown.")

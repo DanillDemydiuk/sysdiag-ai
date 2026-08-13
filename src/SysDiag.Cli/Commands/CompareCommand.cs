@@ -30,6 +30,10 @@ public sealed class CompareCommand : AsyncCommand<CompareCommand.Settings>
         [CommandArgument(1, "<second-id>")]
         [Description("Id of the newer snapshot.")]
         public long SecondId { get; init; }
+
+        [CommandOption("--explain")]
+        [Description("Let the local model judge whether the changes matter.")]
+        public bool Explain { get; init; }
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
@@ -53,6 +57,38 @@ public sealed class CompareCommand : AsyncCommand<CompareCommand.Settings>
         SnapshotDiff diff = _services.Comparer.Compare(left, right);
         DiffRenderer.Render(_console, diff);
 
+        if (settings.Explain)
+        {
+            await RenderExplanationAsync(diff).ConfigureAwait(false);
+        }
+
         return ExitCodes.Success;
+    }
+
+    /// <summary>
+    /// Adds the model's verdict below the table. The table is printed first and
+    /// stays valid on its own: the explanation is an addition, never a
+    /// replacement for the measured data.
+    /// </summary>
+    private async Task RenderExplanationAsync(SnapshotDiff diff)
+    {
+        _console.MarkupLine($"[grey]Asking {Markup.Escape(_services.Settings.Ollama.Model)} about these changes...[/]");
+
+        ExplanationResult result = await _console
+            .Status()
+            .StartAsync("Waiting for the model...", _ => _services.Explanations.ExplainDiffAsync(diff, _services.Cancellation))
+            .ConfigureAwait(false);
+
+        if (!result.IsSuccess)
+        {
+            _console.Write(new Panel($"[yellow]{Markup.Escape(result.FailureReason ?? "No explanation available.")}[/]")
+                .Header("Ollama unavailable")
+                .BorderColor(Color.Yellow));
+            return;
+        }
+
+        _console.Write(new Panel(Markup.Escape(result.Text!))
+            .Header("What the changes mean")
+            .BorderColor(Color.Green));
     }
 }
