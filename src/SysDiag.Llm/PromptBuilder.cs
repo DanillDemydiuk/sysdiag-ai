@@ -69,8 +69,11 @@ public static class PromptBuilder
 
         foreach (DiskInfo disk in disks)
         {
+            // Occupancy comes first: while it stood behind the free space, models
+            // attached the percentage to the wrong value ("66.8 GiB free, which is
+            // 81 percent of the capacity").
             builder.AppendLine(CultureInfo.InvariantCulture,
-                $"- {disk.Identifier} ({disk.FileSystem ?? "unknown file system"}): capacity {ByteSize.Format(disk.TotalBytes)}, free {ByteSize.Format(disk.FreeBytes)}{FormatUsage(disk)}");
+                $"- {disk.Identifier} ({disk.FileSystem ?? "unknown file system"}): {FormatUsage(disk)}total capacity {ByteSize.Format(disk.TotalBytes)}; free space {ByteSize.Format(disk.FreeBytes)}");
         }
     }
 
@@ -93,8 +96,11 @@ public static class PromptBuilder
                 ? string.Empty
                 : $", {adapter.SpeedMbps.Value.ToString(CultureInfo.InvariantCulture)} Mbit/s";
 
-            builder.AppendLine(CultureInfo.InvariantCulture,
-                $"- {adapter.Name}: {(adapter.IsUp ? "connected" : "not connected")}{speed}");
+            // "not connected" was read by a small model as "the adapter is
+            // missing". Saying that the adapter exists first removes that reading.
+            string state = adapter.IsUp ? "installed, link up" : "installed, link down";
+
+            builder.AppendLine(CultureInfo.InvariantCulture, $"- {adapter.Name}: {state}{speed}");
         }
     }
 
@@ -120,6 +126,6 @@ public static class PromptBuilder
         string percent = usedPercent.ToString("0", CultureInfo.InvariantCulture);
         string warning = usedPercent >= 85 ? ", this disk is almost full" : string.Empty;
 
-        return $", {percent} percent of the capacity is occupied{warning}";
+        return $"{percent} percent of the capacity is in use{warning}; ";
     }
 }

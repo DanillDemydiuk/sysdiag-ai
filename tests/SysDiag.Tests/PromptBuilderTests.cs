@@ -36,6 +36,19 @@ public sealed class PromptBuilderTests
     }
 
     [Fact]
+    public void Build_DescribesAnAdapterAsInstalledBeforeItsLinkState()
+    {
+        SystemSnapshot snapshot = TestData.Snapshot() with
+        {
+            NetworkAdapters = [TestData.Adapter("Ethernet", isUp: false)],
+        };
+
+        // A small model turned the earlier wording "not connected" into "the
+        // Ethernet port is missing" - a statement about hardware that does exist.
+        PromptBuilder.Build(snapshot).Should().Contain("Ethernet: installed, link down");
+    }
+
+    [Fact]
     public void Build_NamesWhatThePercentageDescribes()
     {
         SystemSnapshot snapshot = TestData.Snapshot() with
@@ -48,8 +61,11 @@ public sealed class PromptBuilderTests
         // The short form "(75% used)" right after a "free" value was read by a
         // real model as the free share, which turned a full disk into a healthy
         // one. The wording now says what the number means.
-        prompt.Should().Contain("75 percent of the capacity is occupied");
+        prompt.Should().Contain("75 percent of the capacity is in use");
         prompt.Should().NotContain("75% used");
+        // The percentage has to stand before the sizes, otherwise a model reads it
+        // as a property of the free space that follows it.
+        prompt.Should().MatchRegex(@"75 percent of the capacity is in use;.*total capacity");
     }
 
     [Fact]
