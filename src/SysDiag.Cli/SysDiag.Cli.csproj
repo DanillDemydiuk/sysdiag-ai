@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Settings are read at runtime, so they have to sit next to the binary. -->
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SysDiag.Core\SysDiag.Core.csproj" />
     <ProjectReference Include="..\SysDiag.Collectors\SysDiag.Collectors.csproj" />
     <ProjectReference Include="..\SysDiag.Storage\SysDiag.Storage.csproj" />
