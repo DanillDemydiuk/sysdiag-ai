@@ -29,8 +29,8 @@ public sealed class ExplainCommand : AsyncCommand<ExplainCommand.Settings>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         SystemSnapshot? snapshot = settings.Id is null
-            ? await _services.Repository.GetLatestAsync().ConfigureAwait(false)
-            : await _services.Repository.GetAsync(settings.Id.Value).ConfigureAwait(false);
+            ? await _services.Repository.GetLatestAsync(_services.Cancellation).ConfigureAwait(false)
+            : await _services.Repository.GetAsync(settings.Id.Value, _services.Cancellation).ConfigureAwait(false);
 
         if (snapshot is null)
         {
@@ -44,7 +44,7 @@ public sealed class ExplainCommand : AsyncCommand<ExplainCommand.Settings>
 
         ExplanationResult result = await _console
             .Status()
-            .StartAsync("Waiting for the model...", _ => _services.Explanations.ExplainAsync(snapshot))
+            .StartAsync("Waiting for the model...", _ => _services.Explanations.ExplainAsync(snapshot, _services.Cancellation))
             .ConfigureAwait(false);
 
         // An unreachable model is an expected situation: the command says what is

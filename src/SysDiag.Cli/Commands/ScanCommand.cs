@@ -43,10 +43,10 @@ public sealed class ScanCommand : AsyncCommand<ScanCommand.Settings>
 
         SystemSnapshot snapshot = await _console
             .Status()
-            .StartAsync("Collecting system data...", _ => selection.Collector.CollectAsync())
+            .StartAsync("Collecting system data...", _ => selection.Collector.CollectAsync(_services.Cancellation))
             .ConfigureAwait(false);
 
-        long id = await _services.Repository.SaveAsync(snapshot).ConfigureAwait(false);
+        long id = await _services.Repository.SaveAsync(snapshot, _services.Cancellation).ConfigureAwait(false);
 
         // The stored id belongs to the snapshot from now on, so the printed record
         // matches what "list" and "compare" will show.

@@ -31,7 +31,7 @@ public sealed class ListCommand : AsyncCommand<ListCommand.Settings>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         IReadOnlyList<SnapshotSummary> summaries =
-            await _services.Repository.ListAsync(settings.Limit).ConfigureAwait(false);
+            await _services.Repository.ListAsync(settings.Limit, _services.Cancellation).ConfigureAwait(false);
 
         SnapshotRenderer.RenderList(_console, summaries);
         return ExitCodes.Success;

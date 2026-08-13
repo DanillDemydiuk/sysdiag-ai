@@ -18,6 +18,7 @@ namespace SysDiag.Cli;
 public sealed class AppServices : IDisposable
 {
     private readonly HttpClient _httpClient;
+    private readonly CancellationTokenSource _cancellation = new();
 
     private AppServices(AppSettings settings, HttpClient httpClient)
     {
@@ -36,6 +37,16 @@ public sealed class AppServices : IDisposable
     public ISnapshotComparer Comparer { get; }
 
     public IExplanationService Explanations { get; }
+
+    /// <summary>
+    /// Token that every command passes into its asynchronous calls. It is
+    /// cancelled when the user presses Ctrl+C, which turns a hard process kill
+    /// into an orderly shutdown - relevant while waiting for a slow model.
+    /// </summary>
+    public CancellationToken Cancellation => _cancellation.Token;
+
+    /// <summary>Requests cancellation of the running command.</summary>
+    public void Cancel() => _cancellation.Cancel();
 
     /// <summary>
     /// Builds the services and makes sure the database schema exists, so every
@@ -63,5 +74,9 @@ public sealed class AppServices : IDisposable
     public CollectorSelection SelectCollector(bool useDemoData) =>
         SystemCollectorFactory.Create(useDemoData);
 
-    public void Dispose() => _httpClient.Dispose();
+    public void Dispose()
+    {
+        _httpClient.Dispose();
+        _cancellation.Dispose();
+    }
 }

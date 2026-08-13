@@ -34,8 +34,12 @@ public sealed class CompareCommand : AsyncCommand<CompareCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        SystemSnapshot? left = await _services.Repository.GetAsync(settings.FirstId).ConfigureAwait(false);
-        SystemSnapshot? right = await _services.Repository.GetAsync(settings.SecondId).ConfigureAwait(false);
+        SystemSnapshot? left = await _services.Repository
+            .GetAsync(settings.FirstId, _services.Cancellation)
+            .ConfigureAwait(false);
+        SystemSnapshot? right = await _services.Repository
+            .GetAsync(settings.SecondId, _services.Cancellation)
+            .ConfigureAwait(false);
 
         // A wrong id is a user mistake, not a program failure: report it plainly
         // and end with a non-zero exit code instead of throwing.
