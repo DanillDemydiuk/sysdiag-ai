@@ -1,0 +1,55 @@
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 85
+model name	: Intel(R) Xeon(R) Silver 4210 CPU @ 2.20GHz
+stepping	: 7
+cpu MHz		: 2200.000
+cache size	: 14080 KB
+physical id	: 0
+siblings	: 20
+core id		: 0
+cpu cores	: 10
+apicid		: 0
+
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 85
+model name	: Intel(R) Xeon(R) Silver 4210 CPU @ 2.20GHz
+stepping	: 7
+cpu MHz		: 2200.000
+cache size	: 14080 KB
+physical id	: 0
+siblings	: 20
+core id		: 1
+cpu cores	: 10
+apicid		: 2
+
+processor	: 2
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 85
+model name	: Intel(R) Xeon(R) Silver 4210 CPU @ 2.20GHz
+stepping	: 7
+cpu MHz		: 2200.000
+cache size	: 14080 KB
+physical id	: 1
+siblings	: 20
+core id		: 0
+cpu cores	: 10
+apicid		: 32
+
+processor	: 3
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 85
+model name	: Intel(R) Xeon(R) Silver 4210 CPU @ 2.20GHz
+stepping	: 7
+cpu MHz		: 2200.000
+cache size	: 14080 KB
+physical id	: 1
+siblings	: 20
+core id		: 1
+cpu cores	: 10
+apicid		: 34

@@ -21,6 +21,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Excerpts of real /proc files. They are read at runtime, so they have to
+         travel to the output directory next to the test assembly. -->
+    <None Update="Fixtures\*.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\SysDiag.Core\SysDiag.Core.csproj" />
     <ProjectReference Include="..\..\src\SysDiag.Collectors\SysDiag.Collectors.csproj" />
     <ProjectReference Include="..\..\src\SysDiag.Storage\SysDiag.Storage.csproj" />
