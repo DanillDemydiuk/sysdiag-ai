@@ -33,6 +33,14 @@ public static class PromptBuilder
         builder.AppendLine("Say whether the machine looks healthy and mention anything that deserves attention,");
         builder.AppendLine("for example little free disk space or an unusually small amount of memory.");
         builder.AppendLine("Use only the facts below. Do not invent hardware that is not listed.");
+        // Guard rail added after a live run: the model turned "81% in use" into
+        // "18% in use" and called a nearly full disk healthy. Numbers must be
+        // repeated, never recomputed.
+        builder.AppendLine("Repeat every number exactly as written. Never recalculate a percentage or a size.");
+        // Second guard rail from the same live run: the model spelled numbers out
+        // in German words and produced "einhundertsechsundachtzig Prozent" (186%)
+        // by merging two different values.
+        builder.AppendLine("Write numbers as digits, never as words.");
         builder.AppendLine();
         builder.AppendLine("=== SYSTEM SNAPSHOT ===");
         builder.AppendLine(CultureInfo.InvariantCulture, $"Taken at (UTC): {snapshot.CreatedAtUtc:yyyy-MM-dd HH:mm}");
@@ -61,9 +69,8 @@ public static class PromptBuilder
 
         foreach (DiskInfo disk in disks)
         {
-            string usage = FormatUsage(disk);
             builder.AppendLine(CultureInfo.InvariantCulture,
-                $"- {disk.Identifier} ({disk.FileSystem ?? "unknown file system"}): {ByteSize.Format(disk.TotalBytes)} total, {ByteSize.Format(disk.FreeBytes)} free{usage}");
+                $"- {disk.Identifier} ({disk.FileSystem ?? "unknown file system"}): capacity {ByteSize.Format(disk.TotalBytes)}, free {ByteSize.Format(disk.FreeBytes)}{FormatUsage(disk)}");
         }
     }
 
@@ -97,8 +104,10 @@ public static class PromptBuilder
             : $"{cpu.PhysicalCores.Value.ToString(CultureInfo.InvariantCulture)} physical, {cpu.LogicalCores.ToString(CultureInfo.InvariantCulture)} logical";
 
     /// <summary>
-    /// Adds the used percentage, because "70 GiB free" alone says nothing without
-    /// the capacity next to it - and percentages are what a reader reacts to.
+    /// Adds the occupancy as a full sentence fragment. The short form
+    /// "(81% used)" next to a "free" value was misread by the model as the free
+    /// share, so the wording now names what the number describes, and a nearly
+    /// full disk is labelled in words as well.
     /// </summary>
     private static string FormatUsage(DiskInfo disk)
     {
@@ -108,6 +117,9 @@ public static class PromptBuilder
         }
 
         double usedPercent = 100d * (disk.TotalBytes - disk.FreeBytes.Value) / disk.TotalBytes;
-        return $" ({usedPercent.ToString("0", CultureInfo.InvariantCulture)}% used)";
+        string percent = usedPercent.ToString("0", CultureInfo.InvariantCulture);
+        string warning = usedPercent >= 85 ? ", this disk is almost full" : string.Empty;
+
+        return $", {percent} percent of the capacity is occupied{warning}";
     }
 }

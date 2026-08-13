@@ -36,14 +36,49 @@ public sealed class PromptBuilderTests
     }
 
     [Fact]
-    public void Build_AddsUsedPercentagePerDisk()
+    public void Build_NamesWhatThePercentageDescribes()
     {
         SystemSnapshot snapshot = TestData.Snapshot() with
         {
             Disks = [TestData.Disk("C:", totalBytes: 100 * TestData.Gib, freeBytes: 25 * TestData.Gib)],
         };
 
-        PromptBuilder.Build(snapshot).Should().Contain("75% used");
+        string prompt = PromptBuilder.Build(snapshot);
+
+        // The short form "(75% used)" right after a "free" value was read by a
+        // real model as the free share, which turned a full disk into a healthy
+        // one. The wording now says what the number means.
+        prompt.Should().Contain("75 percent of the capacity is occupied");
+        prompt.Should().NotContain("75% used");
+    }
+
+    [Fact]
+    public void Build_AlmostFullDisk_IsAlsoLabelledInWords()
+    {
+        SystemSnapshot snapshot = TestData.Snapshot() with
+        {
+            Disks = [TestData.Disk("C:", totalBytes: 100 * TestData.Gib, freeBytes: 10 * TestData.Gib)],
+        };
+
+        PromptBuilder.Build(snapshot).Should().Contain("this disk is almost full");
+    }
+
+    [Fact]
+    public void Build_HealthyDisk_IsNotLabelledAsAlmostFull()
+    {
+        SystemSnapshot snapshot = TestData.Snapshot() with
+        {
+            Disks = [TestData.Disk("C:", totalBytes: 100 * TestData.Gib, freeBytes: 60 * TestData.Gib)],
+        };
+
+        PromptBuilder.Build(snapshot).Should().NotContain("almost full");
+    }
+
+    [Fact]
+    public void Build_ForbidsRecalculatingNumbers()
+    {
+        PromptBuilder.Build(TestData.Snapshot())
+            .Should().Contain("Repeat every number exactly as written.");
     }
 
     [Fact]
