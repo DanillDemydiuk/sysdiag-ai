@@ -50,7 +50,8 @@ public sealed class OllamaClient : IExplanationService
         var requestBody = new OllamaGenerateRequest(
             _options.Model,
             PromptBuilder.Build(snapshot, _options.ResponseLanguage),
-            Stream: false);
+            Stream: false,
+            OllamaSamplingOptions.Factual);
 
         // A dedicated timeout per request, linked to the caller's token: Ctrl+C
         // still cancels immediately, but a hanging model gives up on its own.

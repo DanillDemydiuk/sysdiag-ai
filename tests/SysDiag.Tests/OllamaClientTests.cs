@@ -54,6 +54,26 @@ public sealed class OllamaClientTests
     }
 
     [Fact]
+    public async Task ExplainAsync_AsksForNearlyDeterministicSampling()
+    {
+        string? body = null;
+        using var handler = new StubHandler(request =>
+        {
+            body = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+            return JsonResponse(HttpStatusCode.OK, """{"response":"ok"}""");
+        });
+        using var httpClient = new HttpClient(handler);
+        var client = new OllamaClient(httpClient, Options);
+
+        await client.ExplainAsync(TestData.Snapshot());
+
+        // Retelling measured values is not a creative task; a live run at the
+        // default temperature produced percentages that were never sent.
+        body.Should().Contain("\"temperature\":0.2");
+        body.Should().Contain("\"stream\":false");
+    }
+
+    [Fact]
     public async Task ExplainAsync_ServerUnreachable_ReturnsUnavailableInsteadOfThrowing()
     {
         using var handler = new StubHandler(_ => throw new HttpRequestException("connection refused"));
