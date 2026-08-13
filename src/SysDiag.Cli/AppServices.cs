@@ -3,6 +3,7 @@ using SysDiag.Collectors;
 using SysDiag.Core.Abstractions;
 using SysDiag.Llm;
 using SysDiag.Storage;
+using SysDiag.Storage.Export;
 
 namespace SysDiag.Cli;
 
@@ -28,6 +29,7 @@ public sealed class AppServices : IDisposable
         Repository = new SqliteSnapshotRepository(settings.ResolveDatabasePath());
         Comparer = new SnapshotComparer();
         Explanations = new OllamaClient(httpClient, settings.Ollama);
+        Exporters = [new JsonSnapshotExporter(), new MarkdownSnapshotExporter()];
     }
 
     public AppSettings Settings { get; }
@@ -37,6 +39,20 @@ public sealed class AppServices : IDisposable
     public ISnapshotComparer Comparer { get; }
 
     public IExplanationService Explanations { get; }
+
+    /// <summary>
+    /// All available export formats. A new format is one entry in this list; the
+    /// export command itself needs no change.
+    /// </summary>
+    public IReadOnlyList<ISnapshotExporter> Exporters { get; }
+
+    /// <summary>
+    /// Finds an exporter by its format name, case-insensitively, or returns
+    /// <c>null</c> when the user asked for a format that does not exist.
+    /// </summary>
+    public ISnapshotExporter? FindExporter(string formatName) =>
+        Exporters.FirstOrDefault(exporter =>
+            string.Equals(exporter.FormatName, formatName, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
     /// Token that every command passes into its asynchronous calls. It is

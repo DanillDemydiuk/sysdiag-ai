@@ -63,7 +63,12 @@ using (services)
             .WithDescription("Show the differences between two snapshots.")
             .WithExample("compare", "1", "2");
 
-        config.AddCommand<ExplainCommand>("explain")
+        config.AddCommand<ExportCommand>("export")
+        .WithDescription("Write a snapshot as JSON or Markdown.")
+        .WithExample("export", "--format", "markdown")
+        .WithExample("export", "2", "--format", "json", "--output", "report.json");
+
+    config.AddCommand<ExplainCommand>("explain")
             .WithDescription("Let the local model explain a snapshot in plain language.")
             .WithExample("explain")
             .WithExample("explain", "2");
