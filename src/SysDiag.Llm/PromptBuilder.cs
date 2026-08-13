@@ -81,6 +81,9 @@ public static class PromptBuilder
         builder.AppendLine("Repeat every number exactly as written. Write numbers as digits, never as words.");
         builder.AppendLine("Entries marked as FLUCTUATING change on their own between two check-ups;");
         builder.AppendLine("treat them as normal and do not present them as a problem.");
+        // The marker is an instruction to the model, not part of the report. A
+        // live run printed "[FLUKTUIEREND]" straight into the user-facing text.
+        builder.AppendLine("Never write the word FLUCTUATING in your answer; it is a marker for you only.");
         builder.AppendLine();
         builder.AppendLine("=== CHANGES ===");
         builder.AppendLine(CultureInfo.InvariantCulture, $"Earlier check-up: {diff.LeftCreatedAtUtc:yyyy-MM-dd HH:mm} UTC");
