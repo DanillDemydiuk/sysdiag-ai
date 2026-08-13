@@ -1,6 +1,6 @@
 # SysDiag-AI
 
-[![CI](https://github.com/DEIN-GITHUB-NAME/sysdiag-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/DEIN-GITHUB-NAME/sysdiag-ai/actions/workflows/ci.yml)
+[![CI](https://github.com/DanillDemydiuk/sysdiag-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/DanillDemydiuk/sysdiag-ai/actions/workflows/ci.yml)
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -33,7 +33,7 @@ Deshalb gilt hier:
 ## Schnellstart
 
 ```bash
-git clone https://github.com/DEIN-GITHUB-NAME/sysdiag-ai.git
+git clone https://github.com/DanillDemydiuk/sysdiag-ai.git
 cd sysdiag-ai
 dotnet run --project src/SysDiag.Cli -- scan --demo
 dotnet run --project src/SysDiag.Cli -- list
