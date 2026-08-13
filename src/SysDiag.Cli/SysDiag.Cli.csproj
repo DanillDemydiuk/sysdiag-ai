@@ -8,6 +8,11 @@
   <ItemGroup>
     <!-- Settings are read at runtime, so they have to sit next to the binary. -->
     <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+
+    <!-- The local override is git-ignored and usually absent; without this rule
+         it would stay in the project folder and never reach the application. -->
+    <None Update="appsettings.local.json" CopyToOutputDirectory="PreserveNewest"
+          Condition="Exists('appsettings.local.json')" />
   </ItemGroup>
 
   <ItemGroup>
